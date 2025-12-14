@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   schedule:
-    - cron: '0 2 * * 0'  # Каждое воскресенье в 2:00 UTC
+  - cron: '0 2,14 * * *'  # Каждый день в 2:00 и 14:00 UTC
   workflow_dispatch:  # Ручной запуск
   push:
     branches:
