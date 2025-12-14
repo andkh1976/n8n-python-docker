@@ -21,7 +21,8 @@ RUN apk add --no-cache \
     openpyxl \
     scikit-learn \
     matplotlib \
-    pillow && \
+    pillow \
+    telethon && \
     apk del gcc g++ musl-dev python3-dev gfortran
 
 USER node
