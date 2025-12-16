@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   n8n:
     image: n8nio/n8n:latest
@@ -10,15 +11,15 @@ services:
       - WEBHOOK_URL=https://n8n.autho-n8n.ru
       - GENERIC_TIMEZONE=Europe/Moscow
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-}
-      # Новые настройки для runners
       - N8N_RUNNERS_ENABLED=true
       - N8N_RUNNERS_MODE=external
-      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_TOKEN:-changeme123456}
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_TOKEN:-changeme12345}
       - N8N_RUNNERS_BROKER_PORT=5679
     volumes:
       - n8n_data:/home/node/.n8n
     ports:
       - 5678
+    user: '1000:1000'
     networks:
       - n8n-network
     healthcheck:
@@ -30,12 +31,10 @@ services:
       retries: 5
 
   n8n-runners:
-    build:
-      context: .
-      dockerfile: Dockerfile.runners
+    image: ghcr.io/andkh1976/n8n-python-docker-runners:latest
     environment:
       - N8N_RUNNERS_MODE=external
-      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_TOKEN:-changeme123456}
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_TOKEN:-changeme12345}
       - N8N_RUNNERS_BROKER_HOST=n8n
       - N8N_RUNNERS_BROKER_PORT=5679
       - N8N_RUNNERS_EXTERNAL_ALLOW=*
@@ -47,8 +46,11 @@ services:
 
 volumes:
   n8n_data:
-    external: true
-    name: n8n_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data/coolify/n8n_data
 
 networks:
   n8n-network:
