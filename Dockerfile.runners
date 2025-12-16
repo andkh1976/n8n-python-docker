@@ -2,62 +2,42 @@ FROM n8nio/runners:latest
 
 USER root
 
-# Установка системных пакетов для компиляции
+# Установка только необходимых системных пакетов
 RUN apk add --no-cache \
     gcc \
     g++ \
     musl-dev \
     python3-dev \
     postgresql-dev \
-    libffi-dev \
-    openssl-dev
+    libffi-dev
 
-# Установка всех Python библиотек
+# Установка ОСНОВНЫХ библиотек (без тяжёлых ML и NLP)
 RUN pip install --no-cache-dir \
     requests \
     beautifulsoup4 \
-    pandas \
-    numpy \
     lxml \
-    openpyxl \
-    scikit-learn \
-    matplotlib \
-    Pillow \
     telethon \
-    selenium \
-    playwright \
-    httpx \
-    aiohttp \
-    PyPDF2 \
-    pdfplumber \
-    python-telegram-bot \
-    aiogram \
-    psycopg2-binary \
-    pymongo \
-    SQLAlchemy \
-    pydantic \
-    jsonschema \
-    marshmallow \
-    nltk \
-    spacy \
+    pandas \
+    openpyxl \
+    Pillow \
     python-dateutil \
     pytz \
-    arrow \
     faker \
-    cryptography \
-    loguru
+    httpx \
+    aiohttp
 
-# Установка браузеров для Playwright
-RUN playwright install chromium && \
-    playwright install-deps chromium
+# Установка библиотек для БД
+RUN pip install --no-cache-dir \
+    psycopg2-binary \
+    pymongo \
+    SQLAlchemy
 
-# Скачивание данных для NLTK
-RUN python3 -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+# Установка валидации
+RUN pip install --no-cache-dir \
+    pydantic \
+    jsonschema
 
-# Скачивание модели для spaCy
-RUN python3 -m spacy download en_core_web_sm
-
-# Очистка для уменьшения размера
+# Очистка
 RUN apk del gcc g++ musl-dev python3-dev && \
     rm -rf /root/.cache/pip
 
