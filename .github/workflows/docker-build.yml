@@ -30,11 +30,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Build and push
+      - name: Build and push runners image
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile.runners
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}-runners:latest
+            ghcr.io/${{ github.repository }}-runners:${{ github.sha }}
