@@ -1,0 +1,64 @@
+FROM n8nio/runners:latest
+
+USER root
+
+# Установка системных пакетов для компиляции
+RUN apk add --no-cache \
+    gcc \
+    g++ \
+    musl-dev \
+    python3-dev \
+    postgresql-dev \
+    libffi-dev \
+    openssl-dev
+
+# Установка всех Python библиотек
+RUN pip install --no-cache-dir \
+    requests \
+    beautifulsoup4 \
+    pandas \
+    numpy \
+    lxml \
+    openpyxl \
+    scikit-learn \
+    matplotlib \
+    Pillow \
+    telethon \
+    selenium \
+    playwright \
+    httpx \
+    aiohttp \
+    PyPDF2 \
+    pdfplumber \
+    python-telegram-bot \
+    aiogram \
+    psycopg2-binary \
+    pymongo \
+    SQLAlchemy \
+    pydantic \
+    jsonschema \
+    marshmallow \
+    nltk \
+    spacy \
+    python-dateutil \
+    pytz \
+    arrow \
+    faker \
+    cryptography \
+    loguru
+
+# Установка браузеров для Playwright
+RUN playwright install chromium && \
+    playwright install-deps chromium
+
+# Скачивание данных для NLTK
+RUN python3 -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet')"
+
+# Скачивание модели для spaCy
+RUN python3 -m spacy download en_core_web_sm
+
+# Очистка для уменьшения размера
+RUN apk del gcc g++ musl-dev python3-dev && \
+    rm -rf /root/.cache/pip
+
+USER node
