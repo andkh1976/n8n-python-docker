@@ -2,6 +2,10 @@ FROM n8nio/runners:latest
 
 USER root
 
+# Временно устанавливаем apk обратно из Alpine
+COPY --from=alpine:3.23 /sbin/apk /sbin/apk
+COPY --from=alpine:3.23 /lib/apk /lib/apk
+
 # Установка только необходимых системных пакетов
 RUN apk add --no-cache \
     gcc \
