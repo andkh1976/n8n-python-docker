@@ -1,21 +1,23 @@
-FROM n8nio/runners:latest
+# Этап 1: Сборка Python-окружения на чистом Alpine
+FROM alpine:3.23 AS python-builder
 
-USER root
-
-# Временно устанавливаем apk обратно из Alpine
-COPY --from=alpine:3.23 /sbin/apk /sbin/apk
-COPY --from=alpine:3.23 /lib/apk /lib/apk
-
-# Установка только необходимых системных пакетов
+# Устанавливаем Python и все build-зависимости
 RUN apk add --no-cache \
+    python3 \
+    py3-pip \
     gcc \
     g++ \
     musl-dev \
     python3-dev \
     postgresql-dev \
-    libffi-dev
+    libffi-dev \
+    libpq
 
-# Установка ОСНОВНЫХ библиотек (без тяжёлых ML и NLP)
+# Создаём виртуальное окружение для изоляции
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Устанавливаем все Python-библиотеки
 RUN pip install --no-cache-dir \
     requests \
     beautifulsoup4 \
@@ -28,21 +30,25 @@ RUN pip install --no-cache-dir \
     pytz \
     faker \
     httpx \
-    aiohttp
-
-# Установка библиотек для БД
-RUN pip install --no-cache-dir \
+    aiohttp \
     psycopg2-binary \
     pymongo \
-    SQLAlchemy
-
-# Установка валидации
-RUN pip install --no-cache-dir \
+    SQLAlchemy \
     pydantic \
     jsonschema
 
-# Очистка
-RUN apk del gcc g++ musl-dev python3-dev && \
-    rm -rf /root/.cache/pip
+# Этап 2: Финальный образ на базе n8n
+FROM n8nio/runners:latest
+
+USER root
+
+# Копируем виртуальное окружение Python из builder
+COPY --from=python-builder /opt/venv /opt/venv
+
+# Копируем системные библиотеки PostgreSQL
+COPY --from=python-builder /usr/lib/libpq.so.5* /usr/lib/
+
+# Добавляем виртуальное окружение в PATH
+ENV PATH="/opt/venv/bin:$PATH"
 
 USER runner
